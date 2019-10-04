@@ -7,7 +7,7 @@ library(shiny)
 library(shinyjs)
 library(shinythemes)
 library(tidyr)
-library(data.table)
+#library(data.table)
 library(DT)
 library(foreign)
 library(dplyr)
@@ -199,7 +199,7 @@ ui <- tagList(
 ))
 
 
-server <- function(input, output){
+server <- function(input, output, session){
   
   
   #Create a whole buncha dataframes that we'll use
@@ -442,7 +442,10 @@ server <- function(input, output){
           )
   })
   
-  #This is gonna be wear the interactive map will live?
+  ###
+  #Map!!
+  ###
+  
   output$map <- renderLeaflet({
     leaflet() %>% addProviderTiles(providers$Esri.WorldImagery) %>% #I also like $Esri.WorldStreetMap and WorldTopoMap
       setView(lat = 61.25, lng = -165.62, zoom = 3) 
@@ -453,7 +456,7 @@ server <- function(input, output){
     if(band() %in% master$BAND){
       formPoints()
     
-    #This observe doesn't happen if you're on the other tab for some reason when starting the app up for the first time
+    #***This observe doesn't happen if you're on the other tab for some reason when starting the app up for the first time
 
       if(nrow(points$df) >= 1){
         leafletProxy('map', data= points$df) %>%
@@ -498,37 +501,11 @@ server <- function(input, output){
       }
   })
   
+  session$onSessionEnded(stopApp)
 }
 
 
 shinyApp(ui = ui, server = server)
 
-# test <- grep(pattern = "^BD", colnames(master), value = TRUE)
-# #Find all the banding drives for some reason??
-# fake <- master[,which(grepl(pattern = "^BD", colnames(master)))]
-#fake1 <- master[which(master$BAND == "D/8Y"), ]
-#test <- grep(pattern = "^(N|n)\\d[0-9]", colnames(master), value = TRUE)
-#test <- grep(pattern = "^(NBC|nbc)\\d[0-9]", colnames(master), value = TRUE)
-
-#Testing finding the last instance where the mate column isn't NA
-# dumb <- master[which(master$BAND == "87EW"), ]
-# ugh <-  dumb[,grep(pattern = "^MATEP", colnames(dumb))]
-# lastmate <- ugh[,last(which(!is.na(ugh)))]
-# new <- master[which(master$BAND == as.character(lastmate)),]
-
-#Testing on reshaping data
-# dumber <- dumb[ ,masterfields]
-# dumber <- gather(dumber, key = "Year", value = "Location", -c(BAND), na.rm = T)
-# dumber <- separate(dumber, col = "Year", into = c("Type", "Year"), sep = "(?<=[A-Za-z])(?=[0-9])")
-# dumber%>%select(-Type,Type)
-
-
-# tagList(
-#   tags$head(
-#     tags$script(type="text/javascript", src = "busy.js")
-#   )
-# ),
-# div(class = "busy", p('your text'),img(src="loader.gif")
-# ),
   
   
